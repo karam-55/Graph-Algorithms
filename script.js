@@ -62,35 +62,41 @@ function calculateNodePositions() {
     const canvas = getCanvas();
     const width = canvas.width;
     const height = canvas.height;
-
-    // توزيع العقد بشكل شبكي/مستطيل أفقي
     const n = courses.length;
-    let cols = Math.ceil(Math.sqrt(n));
-    let rows = Math.ceil(n / cols);
 
-    // للحصول على شكل أفقي أفضل: نفضل أعمدة أكثر من صفوف
-    if (rows > cols) {
-        const temp = cols;
-        cols = rows;
-        rows = temp;
+    // تحديد عدد الأعمدة بناءً على حجم الشاشة
+    let cols;
+    if (width < 400) {
+        cols = 2;
+    } else if (width < 600) {
+        cols = 3;
+    } else {
+        cols = Math.ceil(Math.sqrt(n));
     }
 
-    const marginX = width * 0.12;
-    const marginY = height * 0.15;
+    let rows = Math.ceil(n / cols);
+
+    const nodeRadius = 35;
+    const marginX = nodeRadius + 15;
+    const marginY = nodeRadius + 20;
     const availableWidth = width - 2 * marginX;
     const availableHeight = height - 2 * marginY;
 
     const spacingX = cols > 1 ? availableWidth / (cols - 1) : 0;
-    const spacingY = rows > 1 ? availableHeight / (rows - 1) : 0;
+    const spacingY = rows > 1 ? availableHeight / (rows - 1) : availableHeight / 2;
 
     courses.forEach((course, index) => {
         const col = index % cols;
         const row = Math.floor(index / cols);
 
-        nodePositions[course.id] = {
-            x: cols > 1 ? marginX + col * spacingX : width / 2,
-            y: rows > 1 ? marginY + row * spacingY : height / 2
-        };
+        let x = cols > 1 ? marginX + col * spacingX : width / 2;
+        let y = rows > 1 ? marginY + row * spacingY : height / 2;
+
+        // تأكد إن العقدة ما تطلع برا Canvas
+        x = Math.max(nodeRadius, Math.min(x, width - nodeRadius));
+        y = Math.max(nodeRadius + 10, Math.min(y, height - nodeRadius - 10));
+
+        nodePositions[course.id] = { x, y };
     });
 }
 
