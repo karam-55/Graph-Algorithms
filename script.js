@@ -1,4 +1,4 @@
-// ===== Graph Simulation Data =====
+// Graph Data
 let courses = [
     { id: 1, name: "Programming 1" },
     { id: 2, name: "Programming 2" },
@@ -17,32 +17,34 @@ let nodePositions = {};
 let animatingNodes = new Set();
 let doneNodes = new Set();
 
-// ===== Initialize =====
+// Initialize
 document.addEventListener('DOMContentLoaded', function() {
     updateCourseSelects();
     calculateNodePositions();
     drawGraph();
     setupScrollAnimations();
     setupCanvasResize();
+    startAnimationLoop();
 });
 
-// ===== Scroll Animations =====
 function setupScrollAnimations() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
             }
         });
     }, { threshold: 0.1 });
 
-    document.querySelectorAll('.code-card').forEach((card, index) => {
-        card.style.transitionDelay = `${index * 0.1}s`;
+    document.querySelectorAll('.card').forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = `opacity 0.5s ease ${index * 0.05}s, transform 0.5s ease ${index * 0.05}s`;
         observer.observe(card);
     });
 }
 
-// ===== Canvas Setup =====
 function setupCanvasResize() {
     window.addEventListener('resize', function() {
         calculateNodePositions();
@@ -53,8 +55,8 @@ function setupCanvasResize() {
 function getCanvas() {
     const canvas = document.getElementById('graphCanvas');
     const rect = canvas.parentElement.getBoundingClientRect();
-    canvas.width = rect.width - 60;
-    canvas.height = Math.max(rect.height - 60, 450);
+    canvas.width = rect.width - 16;
+    canvas.height = rect.height - 16;
     return canvas;
 }
 
@@ -64,26 +66,16 @@ function calculateNodePositions() {
     const height = canvas.height;
     const n = courses.length;
 
-    // تحديد عدد الأعمدة بناءً على حجم الشاشة
-    let cols;
-    if (width < 400) {
-        cols = 2;
-    } else if (width < 600) {
-        cols = 3;
-    } else {
-        cols = Math.ceil(Math.sqrt(n));
-    }
-
+    let cols = width < 350 ? 2 : 3;
     let rows = Math.ceil(n / cols);
 
-    const nodeRadius = 35;
-    const marginX = nodeRadius + 15;
-    const marginY = nodeRadius + 20;
+    const marginX = 45;
+    const marginY = 40;
     const availableWidth = width - 2 * marginX;
     const availableHeight = height - 2 * marginY;
 
     const spacingX = cols > 1 ? availableWidth / (cols - 1) : 0;
-    const spacingY = rows > 1 ? availableHeight / (rows - 1) : availableHeight / 2;
+    const spacingY = rows > 1 ? availableHeight / (rows - 1) : 0;
 
     courses.forEach((course, index) => {
         const col = index % cols;
@@ -92,9 +84,8 @@ function calculateNodePositions() {
         let x = cols > 1 ? marginX + col * spacingX : width / 2;
         let y = rows > 1 ? marginY + row * spacingY : height / 2;
 
-        // تأكد إن العقدة ما تطلع برا Canvas
-        x = Math.max(nodeRadius, Math.min(x, width - nodeRadius));
-        y = Math.max(nodeRadius + 10, Math.min(y, height - nodeRadius - 10));
+        x = Math.max(35, Math.min(x, width - 35));
+        y = Math.max(35, Math.min(y, height - 35));
 
         nodePositions[course.id] = { x, y };
     });
@@ -106,23 +97,18 @@ function drawGraph() {
     const width = canvas.width;
     const height = canvas.height;
 
-    // Clear with gradient
-    const gradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, width);
-    gradient.addColorStop(0, 'rgba(15, 23, 42, 0.3)');
-    gradient.addColorStop(1, 'rgba(15, 23, 42, 0.8)');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
+    ctx.clearRect(0, 0, width, height);
 
     // Draw grid
-    ctx.strokeStyle = 'rgba(99, 102, 241, 0.08)';
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.06)';
     ctx.lineWidth = 1;
-    for (let i = 0; i < width; i += 40) {
+    for (let i = 0; i < width; i += 30) {
         ctx.beginPath();
         ctx.moveTo(i, 0);
         ctx.lineTo(i, height);
         ctx.stroke();
     }
-    for (let i = 0; i < height; i += 40) {
+    for (let i = 0; i < height; i += 30) {
         ctx.beginPath();
         ctx.moveTo(0, i);
         ctx.lineTo(width, i);
@@ -134,8 +120,7 @@ function drawGraph() {
         const from = nodePositions[edge.from];
         const to = nodePositions[edge.to];
         if (!from || !to) return;
-
-        drawArrow(ctx, from.x, from.y + 25, to.x, to.y - 25, edge.from, edge.to);
+        drawArrow(ctx, from.x, from.y + 22, to.x, to.y - 22);
     });
 
     // Draw nodes
@@ -146,85 +131,65 @@ function drawGraph() {
         const isAnimating = animatingNodes.has(course.id);
         const isDone = doneNodes.has(course.id);
 
-        // Glow effect
-        if (isAnimating) {
-            ctx.shadowBlur = 30;
-            ctx.shadowColor = '#f59e0b';
-        } else if (isDone) {
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = '#10b981';
-        } else {
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = 'rgba(99, 102, 241, 0.5)';
-        }
-
-        // Node circle
         ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 30, 0, Math.PI * 2);
-        const nodeGradient = ctx.createLinearGradient(pos.x - 30, pos.y - 30, pos.x + 30, pos.y + 30);
+        ctx.arc(pos.x, pos.y, 28, 0, Math.PI * 2);
+
+        const gradient = ctx.createRadialGradient(pos.x - 10, pos.y - 10, 0, pos.x, pos.y, 28);
         if (isAnimating) {
-            nodeGradient.addColorStop(0, '#f59e0b');
-            nodeGradient.addColorStop(1, '#d97706');
+            gradient.addColorStop(0, '#fbbf24');
+            gradient.addColorStop(1, '#d97706');
         } else if (isDone) {
-            nodeGradient.addColorStop(0, '#10b981');
-            nodeGradient.addColorStop(1, '#059669');
+            gradient.addColorStop(0, '#4ade80');
+            gradient.addColorStop(1, '#16a34a');
         } else {
-            nodeGradient.addColorStop(0, '#6366f1');
-            nodeGradient.addColorStop(1, '#4f46e5');
+            gradient.addColorStop(0, '#60a5fa');
+            gradient.addColorStop(1, '#2563eb');
         }
-        ctx.fillStyle = nodeGradient;
+        ctx.fillStyle = gradient;
         ctx.fill();
 
-        ctx.shadowBlur = 0;
-
-        // Border
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Text
         ctx.fillStyle = '#fff';
-        ctx.font = 'bold 11px Cairo';
+        ctx.font = 'bold 10px Cairo';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        // Wrap text if too long
         const words = course.name.split(' ');
         if (words.length > 1 && course.name.length > 8) {
-            ctx.fillText(words.slice(0, Math.ceil(words.length/2)).join(' '), pos.x, pos.y - 6);
-            ctx.fillText(words.slice(Math.ceil(words.length/2)).join(' '), pos.x, pos.y + 6);
+            ctx.fillText(words.slice(0, Math.ceil(words.length/2)).join(' '), pos.x, pos.y - 5);
+            ctx.fillText(words.slice(Math.ceil(words.length/2)).join(' '), pos.x, pos.y + 5);
         } else {
             ctx.fillText(course.name, pos.x, pos.y);
         }
     });
 }
 
-function drawArrow(ctx, fromX, fromY, toX, toY, fromId, toId) {
-    const headLength = 12;
+function drawArrow(ctx, fromX, fromY, toX, toY) {
+    const headLength = 10;
     const angle = Math.atan2(toY - fromY, toX - fromX);
 
-    // Draw animated dashed line
     ctx.beginPath();
     ctx.moveTo(fromX, fromY);
     ctx.lineTo(toX, toY);
-    ctx.strokeStyle = 'rgba(99, 102, 241, 0.8)';
-    ctx.lineWidth = 2.5;
-    ctx.setLineDash([8, 6]);
-    ctx.lineDashOffset = -Date.now() / 30;
+    ctx.strokeStyle = 'rgba(96, 165, 250, 0.8)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.lineDashOffset = -Date.now() / 40;
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Arrow head
     ctx.beginPath();
     ctx.moveTo(toX, toY);
     ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6), toY - headLength * Math.sin(angle - Math.PI / 6));
     ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6));
-    ctx.fillStyle = '#6366f1';
+    ctx.fillStyle = '#60a5fa';
     ctx.fill();
 }
 
-// Animate graph continuously
-function startGraphAnimation() {
+function startAnimationLoop() {
     function animate() {
         drawGraph();
         requestAnimationFrame(animate);
@@ -232,9 +197,7 @@ function startGraphAnimation() {
     animate();
 }
 
-startGraphAnimation();
-
-// ===== Course Management =====
+// Course Management
 function updateCourseSelects() {
     const fromSelect = document.getElementById('fromCourse');
     const toSelect = document.getElementById('toCourse');
@@ -317,22 +280,17 @@ function resetGraph() {
     updateCourseSelects();
     calculateNodePositions();
     drawGraph();
-    showSimOutput('🔄 تم إعادة ضبط الـ Graph');
+    showSimOutput('🔄 تم إعادة الضبط');
 }
 
 function showSimOutput(text) {
-    const output = document.getElementById('simOutput');
-    output.textContent = text;
-    output.style.animation = 'none';
-    setTimeout(() => {
-        output.style.animation = 'pulse 0.5s ease';
-    }, 10);
+    document.getElementById('simOutput').textContent = text;
 }
 
-// ===== Topological Sort with Animation =====
+// Topological Sort
 async function runTopologicalSort() {
     if (detectCycleLogic()) {
-        showSimOutput('🚫 لا يمكن الترتيب: يوجد حلقة في المتطلبات!\nاستخدم "كشف الحلقة" لمعرفة التفاصيل.');
+        showSimOutput('🚫 يوجد حلقة في المتطلبات!');
         return;
     }
 
@@ -342,17 +300,14 @@ async function runTopologicalSort() {
     let visited = new Set();
     let topoStack = [];
 
-    showSimOutput('⏳ جاري حساب الترتيب المناسب باستخدام DFS...');
+    showSimOutput('⏳ جاري الترتيب...');
 
     async function topoDFS(u) {
         visited.add(u);
         animatingNodes.add(u);
-        drawGraph();
-        await sleep(800);
+        await sleep(500);
 
-        // نجيب المواد التابعة للمادة u
         let dependents = edges.filter(e => e.from === u).map(e => e.to);
-
         for (let v of dependents) {
             if (!visited.has(v)) {
                 await topoDFS(v);
@@ -362,8 +317,7 @@ async function runTopologicalSort() {
         animatingNodes.delete(u);
         doneNodes.add(u);
         topoStack.push(u);
-        drawGraph();
-        await sleep(400);
+        await sleep(300);
     }
 
     for (let c of courses) {
@@ -372,16 +326,15 @@ async function runTopologicalSort() {
         }
     }
 
-    // طباعة المكدس بالعكس
     const orderText = topoStack.slice().reverse().map((id, index) => {
         const course = courses.find(c => c.id === id);
         return `${index + 1}. ${course.name}`;
     }).join('\n');
 
-    showSimOutput('✅ الترتيب الموصى به (DFS Topological Sort):\n' + orderText);
+    showSimOutput('✅ الترتيب الموصى به:\n' + orderText);
 }
 
-// ===== Cycle Detection =====
+// Cycle Detection
 async function detectCycle() {
     animatingNodes.clear();
     doneNodes.clear();
@@ -395,12 +348,11 @@ async function detectCycle() {
     async function dfs(u, path) {
         state[u] = 1;
         animatingNodes.add(u);
-        drawGraph();
-        await sleep(600);
+        await sleep(400);
 
-        for (let i = 0; i < edges.length; i++) {
-            if (edges[i].from === u) {
-                let v = edges[i].to;
+        for (let e of edges) {
+            if (e.from === u) {
+                let v = e.to;
                 if (state[v] === 1) {
                     cycleFound = true;
                     cyclePath = [...path, u, v];
@@ -415,13 +367,12 @@ async function detectCycle() {
         state[u] = 2;
         animatingNodes.delete(u);
         doneNodes.add(u);
-        drawGraph();
         return false;
     }
 
-    for (let i = 0; i < courses.length; i++) {
-        if (state[courses[i].id] === 0) {
-            if (await dfs(courses[i].id, [])) break;
+    for (let c of courses) {
+        if (state[c.id] === 0) {
+            if (await dfs(c.id, [])) break;
         }
     }
 
@@ -430,9 +381,9 @@ async function detectCycle() {
             const course = courses.find(c => c.id === id);
             return course ? course.name : id;
         }).join(' → ');
-        showSimOutput('🚫 تم اكتشاف حلقة!\nالمسار: ' + cycleText + '\nهذا يعني مادة تعتمد على نفسها بشكل غير مباشر.');
+        showSimOutput('🚫 حلقة: ' + cycleText);
     } else {
-        showSimOutput('✅ لا توجد حلقات في الـ Graph.\nالخطة الدراسية صحيحة.');
+        showSimOutput('✅ لا توجد حلقات');
     }
 }
 
@@ -442,9 +393,9 @@ function detectCycleLogic() {
 
     function dfs(u) {
         state[u] = 1;
-        for (let i = 0; i < edges.length; i++) {
-            if (edges[i].from === u) {
-                let v = edges[i].to;
+        for (let e of edges) {
+            if (e.from === u) {
+                let v = e.to;
                 if (state[v] === 1) return true;
                 if (state[v] === 0 && dfs(v)) return true;
             }
@@ -453,9 +404,9 @@ function detectCycleLogic() {
         return false;
     }
 
-    for (let i = 0; i < courses.length; i++) {
-        if (state[courses[i].id] === 0) {
-            if (dfs(courses[i].id)) return true;
+    for (let c of courses) {
+        if (state[c.id] === 0) {
+            if (dfs(c.id)) return true;
         }
     }
     return false;
@@ -465,105 +416,30 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// ===== C++ Code Runner (Simulation) =====
+// C++ Code Runner (Simulation)
 function runCppCode() {
-    const code = document.getElementById('cppEditor').value;
     const outputDiv = document.getElementById('consoleOutput');
-
-    outputDiv.innerHTML = '<div class="loading"></div> Compiling and running...';
+    outputDiv.innerHTML = '<div class="loading"></div> Running...';
 
     setTimeout(() => {
-        const output = simulateCppOutput(code);
-        outputDiv.textContent = output;
-    }, 1500);
+        outputDiv.textContent = '=== All Courses ===\n' +
+            '101 - Programming 1\n' +
+            '102 - Programming 2\n' +
+            '103 - Data Structures\n' +
+            '104 - Algorithms\n\n' +
+            '=== Prerequisites for Algorithms ===\n' +
+            '- 103 - Data Structures\n' +
+            '- 102 - Programming 2\n' +
+            '- 101 - Programming 1\n\n' +
+            '=== Recommended Study Order ===\n' +
+            '101 - Programming 1\n' +
+            '102 - Programming 2\n' +
+            '103 - Data Structures\n' +
+            '104 - Algorithms\n\n' +
+            'Process finished with exit code 0';
+    }, 1000);
 }
 
 function clearOutput() {
-    document.getElementById('consoleOutput').textContent = 'اضغط "تشغيل الكود" لرؤية الناتج هنا...';
-}
-
-function simulateCppOutput(code) {
-    // This function simulates the C++ compiler output based on the visible code
-    // It analyzes simple patterns without actually compiling
-
-    const lines = code.split('\n');
-    let output = [];
-    let hasMain = code.includes('int main()');
-    let hasIncludes = code.includes('#include');
-    
-    // Try to find cout statements
-    const coutRegex = /cout\s*<<\s*"([^"]*)"|cout\s*<<\s*([^;]+)/g;
-    let coutMatches = [];
-    let match;
-    while ((match = coutRegex.exec(code)) !== null) {
-        coutMatches.push(match);
-    }
-
-    if (!hasIncludes && hasMain) {
-        return 'error: iostream not included\nerror: expected declaration before ...';
-    }
-
-    if (!hasMain) {
-        return 'error: undefined reference to `WinMain\'\nerror: ld returned 1 exit status';
-    }
-
-    // Detect priority queue / heap example
-    if (code.includes('priority_queue') && code.includes('minHeap')) {
-        // Extract pushed values
-        const pushRegex = /minHeap\.push\((\d+)\)/g;
-        let values = [];
-        let m;
-        while ((m = pushRegex.exec(code)) !== null) {
-            values.push(parseInt(m[1]));
-        }
-        
-        if (values.length > 0) {
-            values.sort((a, b) => a - b);
-            
-            if (code.includes('Study order')) {
-                output.push('Study order by priority: ' + values.join(' '));
-            } else {
-                output.push('Min Heap: ' + values.join(' '));
-            }
-        }
-    }
-
-    // Detect project code with predefined data
-    if (code.includes('=== All Courses ===') || code.includes('showPrerequisites')) {
-        output.push('=== All Courses ===');
-        output.push('101 - Programming 1 (3 hours)');
-        output.push('102 - Programming 2 (3 hours)');
-        output.push('103 - Data Structures (3 hours)');
-        output.push('104 - Algorithms (3 hours)');
-        output.push('');
-        output.push('=== Prerequisites for Algorithms ===');
-        output.push('- 103 - Data Structures');
-        output.push('- 102 - Programming 2');
-        output.push('- 101 - Programming 1');
-        output.push('');
-        output.push('=== Recommended Study Order ===');
-        output.push('101 - Programming 1');
-        output.push('102 - Programming 2');
-        output.push('103 - Data Structures');
-        output.push('104 - Algorithms');
-    }
-
-    // Detect simple cout text outputs
-    if (output.length === 0) {
-        // Default: try to find literal strings in cout
-        const stringRegex = /cout\s*<<\s*"([^"]*)"/g;
-        let strings = [];
-        let sm;
-        while ((sm = stringRegex.exec(code)) !== null) {
-            strings.push(sm[1]);
-        }
-        
-        if (strings.length > 0) {
-            output.push(strings.join(''));
-        } else {
-            output.push('Program finished with exit code 0');
-        }
-    }
-
-    return output.join('\n') + '\n\nProcess finished with exit code 0';
+    document.getElementById('consoleOutput').textContent = 'اضغط "تشغيل" لرؤية الناتج...';
 }

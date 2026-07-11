@@ -8,95 +8,58 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="bg-animation">
-        <div class="shape"></div>
-        <div class="shape"></div>
-        <div class="shape"></div>
-    </div>
-
     <nav class="navbar">
-        <div class="nav-brand">
-            <span class="logo">🎓</span>
-            <span>نظام المتطلبات الأكاديمية</span>
-        </div>
-        <div class="nav-links">
-            <a href="#home">الرئيسية</a>
-            <a href="#explanation">الشرح</a>
-            <a href="#simulation">المحاكاة</a>
-            <a href="#editor">المحرر</a>
+        <div class="container">
+            <div class="nav-brand">🎓 نظام المتطلبات الأكاديمية</div>
+            <div class="nav-links">
+                <a href="#home">الرئيسية</a>
+                <a href="#explain">الشرح</a>
+                <a href="#sim">المحاكاة</a>
+                <a href="#code">الكود</a>
+            </div>
         </div>
     </nav>
 
     <section id="home" class="hero">
-        <div class="hero-content">
-            <div class="badge">مشروع خوارزميات 2</div>
-            <h1 class="hero-title">
-                نظام إدارة المتطلبات الأكاديمية
-                <span class="gradient-text">باستخدام Graph Algorithms</span>
-            </h1>
-            <p class="hero-description">
-                تعلم كيف نمثل المواد الجامعية كـ Graph موجه، ونرتبها باستخدام Topological Sort، 
-                ونكتشف الحلقات في المتطلبات باستخدام DFS.
+        <div class="container">
+            <div class="hero-badge">مشروع خوارزميات 2</div>
+            <h1 class="hero-title">نظام إدارة المتطلبات الأكاديمية <span>باستخدام Graph Algorithms</span></h1>
+            <p class="hero-desc">
+                تعلم كيف نمثل المواد الجامعية كـ Graph موجه، ونرتبها باستخدام Topological Sort، ونكتشف الحلقات في المتطلبات باستخدام DFS.
             </p>
-            <div class="hero-buttons">
-                <a href="#simulation" class="btn btn-primary">جرب المحاكاة</a>
-                <a href="#explanation" class="btn btn-secondary">اقرأ الشرح</a>
+            <div class="hero-btns">
+                <a href="#sim" class="btn btn-primary">جرب المحاكاة</a>
+                <a href="#explain" class="btn btn-secondary">اقرأ الشرح</a>
             </div>
-        </div>
-        <div class="hero-graphic">
-            <div class="node node-1">Prog 1</div>
-            <div class="node node-2">Prog 2</div>
-            <div class="node node-3">Data Struct</div>
-            <div class="node node-4">Algorithms</div>
-            <svg class="edges">
-                <line x1="50%" y1="25%" x2="50%" y2="45%" class="edge"/>
-                <line x1="50%" y1="50%" x2="50%" y2="70%" class="edge"/>
-                <line x1="50%" y1="75%" x2="50%" y2="95%" class="edge"/>
-            </svg>
         </div>
     </section>
 
-    <section id="explanation" class="explanation">
+    <section id="explain" class="section">
         <div class="container">
-            <div class="section-header">
-                <h2>شرح الكود خطوة بخطوة</h2>
-                <p>كل جزء من الكود موضح بالتفصيل مع رسوم متحركة</p>
-            </div>
+            <h2 class="section-title">شرح الكود خطوة بخطوة</h2>
+            <p class="section-subtitle">كل جزء من الكود موضح بالتفصيل</p>
 
-            <div class="code-sections">
-                <div class="code-card" data-step="1">
+            <div class="cards">
+                <div class="card">
                     <div class="card-header">
-                        <span class="step-number">01</span>
+                        <div class="card-number">01</div>
                         <h3>تمثيل المادة الدراسية</h3>
                     </div>
-                    <div class="card-body">
-                        <pre class="code-block"><code>struct Course {
+                    <p>كل مادة تخزن كـ struct بسيط يحتوي على رقم المادة واسمها وعدد الساعات.</p>
+                    <div class="code-box"><pre>struct Course {
     int id;
     string name;
     int hours;
-};</code></pre>
-                        <p class="card-text">
-                            كل مادة في الجامعة نخزنها كـ <strong>object</strong> بسيط فيه:
-                            رقم المادة، اسمها، وعدد الساعات. 
-                            هذي أبسط طريقة ننظم فيها البيانات.
-                        </p>
-                        <div class="visual-demo">
-                            <div class="course-box">
-                                <div class="course-field">ID: 101</div>
-                                <div class="course-field">Name: Programming 1</div>
-                                <div class="course-field">Hours: 3</div>
-                            </div>
-                        </div>
-                    </div>
+};</pre></div>
                 </div>
 
-                <div class="code-card" data-step="2">
+                <div class="card">
                     <div class="card-header">
-                        <span class="step-number">02</span>
+                        <div class="card-number">02</div>
                         <h3>تمثيل الـ Graph</h3>
                     </div>
-                    <div class="card-body">
-                        <pre class="code-block"><code>const int MAX = 100;
+                    <p>بدل مكتبات جاهزة، استخدمنا Arrays ثنائية البعد لتمثيل Adjacency List.</p>
+                    <div class="code-box"><pre>const int MAX = 100;
 
 Course courses[MAX];
 int courseCount = 0;
@@ -105,246 +68,112 @@ int prereq[MAX][MAX];
 int prereqCount[MAX];
 
 int adj[MAX][MAX];
-int adjCount[MAX];</code></pre>
-                        <p class="card-text">
-                            بدل ما نستخدم مكتبة جاهزة للـ Graph، بنسوي Adjacency List يدوياً باستخدام arrays:
-                            <br><br>
-                            • <strong>courses[]</strong>: مصفوفة المواد.<br>
-                            • <strong>adj[][]</strong>: كل مادة وموادها التابعة.<br>
-                            • <strong>prereq[][]</strong>: متطلبات كل مادة السابقة.<br>
-                            • <strong>courseCount</strong>: عدد المواد المخزنة.
-                        </p>
-                    </div>
+int adjCount[MAX];</pre></div>
                 </div>
 
-                <div class="code-card" data-step="3">
+                <div class="card">
                     <div class="card-header">
-                        <span class="step-number">03</span>
+                        <div class="card-number">03</div>
                         <h3>إضافة مادة جديدة</h3>
                     </div>
-                    <div class="card-body">
-                        <pre class="code-block"><code>void addCourse() {
+                    <p>نقرأ بيانات المادة ونخزنها في المصفوفة، ثم نزيد العداد.</p>
+                    <div class="code-box"><pre>void addCourse() {
     Course c;
-
-    cout << "Enter course ID: ";
     cin >> c.id;
-
-    if (courseIndex(c.id) != -1) {
-        cout << "Course already exists!\n";
-        return;
-    }
-
-    cout << "Enter course name: ";
     cin.ignore();
     getline(cin, c.name);
-
-    cout << "Enter credit hours: ";
     cin >> c.hours;
 
     courses[courseCount] = c;
     courseCount++;
-
-    cout << "Course added successfully.\n";
-}</code></pre>
-                        <p class="card-text">
-                            نطلب من المستخدم بيانات المادة، ثم نخزنها في المصفوفة في الموقع 
-                            <code>courseCount</code> ونزيد العداد. قبل الإضافة نتحقق إن رقم المادة مو موجود من قبل.
-                        </p>
-                    </div>
+}</pre></div>
                 </div>
 
-                <div class="code-card" data-step="4">
+                <div class="card">
                     <div class="card-header">
-                        <span class="step-number">04</span>
+                        <div class="card-number">04</div>
                         <h3>إضافة متطلب سابق</h3>
                     </div>
-                    <div class="card-body">
-                        <pre class="code-block"><code>void addPrerequisite() {
-    // ... قراءة courseId و preId ...
+                    <p>نخزن العلاقة في كلا الاتجاهين: المتطلب في prereq، والمادة التابعة في adj.</p>
+                    <div class="code-box"><pre>prereq[cIdx][prereqCount[cIdx]] = preId;
+prereqCount[cIdx]++;
 
-    // التحقق من عدم وجود العلاقة مسبقاً
-    for (int i = 0; i < prereqCount[cIdx]; i++) {
-        if (prereq[cIdx][i] == preId) {
-            cout << "Prerequisite already exists!\n";
-            return;
-        }
-    }
-
-    prereq[cIdx][prereqCount[cIdx]] = preId;
-    prereqCount[cIdx]++;
-
-    adj[pIdx][adjCount[pIdx]] = courseId;
-    adjCount[pIdx]++;
-}</code></pre>
-                        <p class="card-text">
-                            لو المادة B تحتاج A، نضيف:<br>
-                            • A في مصفوفة متطلبات B، ونزيد <code>prereqCount[cIdx]</code>.<br>
-                            • B في مصفوفة المواد التابعة لـ A، ونزيد <code>adjCount[pIdx]</code>.<br>
-                            هيك نقدر نمشي في الـ Graph بالاتجاهين بدون أي مكتبة جاهزة.
-                        </p>
-                        <div class="visual-demo prereq-demo">
-                            <div class="course-node">A</div>
-                            <div class="arrow">→</div>
-                            <div class="course-node highlight">B</div>
-                        </div>
-                    </div>
+adj[pIdx][adjCount[pIdx]] = courseId;
+adjCount[pIdx]++;</pre></div>
                 </div>
 
-                <div class="code-card" data-step="5">
+                <div class="card">
                     <div class="card-header">
-                        <span class="step-number">05</span>
+                        <div class="card-number">05</div>
                         <h3>عرض المتطلبات (DFS)</h3>
                     </div>
-                    <div class="card-body">
-                        <pre class="code-block"><code>void showPrerequisites(int id) {
+                    <p>نستخدم DFS recursive لنطبع المتطلبات المباشرة وغير المباشرة.</p>
+                    <div class="code-box"><pre>void showPrerequisites(int id) {
     int idx = courseIndex(id);
+    if (idx == -1) return;
 
-    if (idx == -1)
-        return;
-
-    for (int i = 0; i < prereqCount[idx]; i++) {
+    for (int i = 0; i &lt; prereqCount[idx]; i++) {
         int preId = prereq[idx][i];
-
         cout << "- " << preId << "\n";
-
-        // استدعاء recursive لعرض متطلبات المتطلب
         showPrerequisites(preId);
     }
-}</code></pre>
-                        <p class="card-text">
-                            نستخدم <strong>DFS</strong> (Depth First Search) عشان نعمق في المتطلبات:
-                            لو Algorithms يحتاج Data Structures، وData Structures يحتاج Programming 2،
-                            نطبعهم كلهم بالترتيب.
-                        </p>
-                    </div>
+}</pre></div>
                 </div>
 
-                <div class="code-card" data-step="6">
+                <div class="card">
                     <div class="card-header">
-                        <span class="step-number">06</span>
-                        <h3>كشف الحلقات (Cycle Detection)</h3>
+                        <div class="card-number">06</div>
+                        <h3>كشف الحلقات</h3>
                     </div>
-                    <div class="card-body">
-                        <pre class="code-block"><code>// state: 0 = ما زرته، 1 = قاعد أزوره، 2 = خلصت منه
-bool hasCycleDFS(int u, int state[]) {
+                    <p>نستخدم DFS مع ثلاث حالات: 0 = ما زرته، 1 = قاعد أزوره، 2 = خلصت منه.</p>
+                    <div class="code-box"><pre>bool hasCycleDFS(int u, int state[]) {
     state[u] = 1;
 
-    for (int i = 0; i < adjCount[u]; i++) {
+    for (int i = 0; i &lt; adjCount[u]; i++) {
         int v = adj[u][i];
         int vIdx = courseIndex(v);
+        if (vIdx == -1) continue;
 
-        if (vIdx == -1)
-            continue;
-
-        if (state[vIdx] == 1)
-            return true;
-
+        if (state[vIdx] == 1) return true;
         if (state[vIdx] == 0 && hasCycleDFS(vIdx, state))
             return true;
     }
 
     state[u] = 2;
     return false;
-}</code></pre>
-                        <p class="card-text">
-                            الحلقة تعني: مادة تعتمد على نفسها بشكل غير مباشر.
-                            نستخدم مصفوفة حالات بسيطة:<br>
-                            • 0 = ما زرناه<br>
-                            • 1 = قاعدين نزوره<br>
-                            • 2 = خلصنا منه<br>
-                            لو رجعنا لعقدة في الحالة 1، معناه حلقة.
-                        </p>
-                    </div>
+}</pre></div>
                 </div>
 
-                <div class="code-card" data-step="7">
+                <div class="card">
                     <div class="card-header">
-                        <span class="step-number">07</span>
-                        <h3>Topological Sort (ترتيب المواد)</h3>
+                        <div class="card-number">07</div>
+                        <h3>Topological Sort</h3>
                     </div>
-                    <div class="card-body">
-                        <pre class="code-block"><code>// مكدس للـ Topological Sort
-int topoStack[MAX];
-int topoTop = -1;
-
-void topoDFS(int u, bool visited[]) {
+                    <p>نزور كل عقدة ونعمق في تابعاتها، ثم نضعها في المكدس. طباعة المكدس بالعكس تعطي الترتيب الصحيح.</p>
+                    <div class="code-box"><pre>void topoDFS(int u, bool visited[]) {
     visited[u] = true;
 
-    for (int i = 0; i < adjCount[u]; i++) {
+    for (int i = 0; i &lt; adjCount[u]; i++) {
         int v = adj[u][i];
         int vIdx = courseIndex(v);
-
-        if (vIdx != -1 && !visited[vIdx]) {
+        if (vIdx != -1 && !visited[vIdx])
             topoDFS(vIdx, visited);
-        }
     }
 
     topoStack[++topoTop] = courses[u].id;
-}
-
-void topologicalSort() {
-    bool visited[MAX] = {false};
-    topoTop = -1;
-
-    for (int i = 0; i < courseCount; i++) {
-        if (!visited[i]) {
-            topoDFS(i, visited);
-        }
-    }
-
-    // طباعة المكدس بالعكس
-    for (int i = topoTop; i >= 0; i--) {
-        int idx = courseIndex(topoStack[i]);
-        cout << courses[idx].id << " - "
-             << courses[idx].name << "\n";
-    }
-}</code></pre>
-                        <p class="card-text">
-                            <strong>DFS-based Topological Sort</strong>: نزور كل مادة ونعمق في تابعاتها،
-                            وبعد ما نخلص منها نضعها في المكدس. لما نطبع المكدس بالعكس، نحصل على الترتيب الصحيح لدراسة المواد.
-                        </p>
-                    </div>
+}</pre></div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="simulation" class="simulation">
+    <section id="sim" class="section simulation">
         <div class="container">
-            <div class="section-header">
-                <h2>محاكاة تفاعلية للـ Graph</h2>
-                <p>أضف مواد، اربطها بمتطلبات، وجرب الخوارزميات</p>
-            </div>
+            <h2 class="section-title">محاكاة تفاعلية للـ Graph</h2>
+            <p class="section-subtitle">أضف مواد، اربطها بمتطلبات، وجرب الخوارزميات</p>
 
-            <div class="sim-container">
-                <div class="sim-controls">
-                    <div class="control-group">
-                        <h4>إضافة مادة</h4>
-                        <input type="text" id="courseName" placeholder="اسم المادة (مثال: Programming 1)">
-                        <button class="btn btn-primary" onclick="addCourse()">إضافة مادة</button>
-                    </div>
-
-                    <div class="control-group">
-                        <h4>ربط متطلب</h4>
-                        <select id="fromCourse"></select>
-                        <span class="arrow-label">➜ متطلب لـ</span>
-                        <select id="toCourse"></select>
-                        <button class="btn btn-primary" onclick="addEdge()">إضافة رابط</button>
-                    </div>
-
-                    <div class="control-group">
-                        <h4>الخوارزميات</h4>
-                        <button class="btn btn-success" onclick="runTopologicalSort()">Topological Sort</button>
-                        <button class="btn btn-warning" onclick="detectCycle()">كشف الحلقة</button>
-                        <button class="btn btn-danger" onclick="resetGraph()">إعادة ضبط</button>
-                    </div>
-
-                    <div class="output-box" id="simOutput">
-                        ابدأ بإضافة مواد وتشغيل الخوارزميات...
-                    </div>
-                </div>
-
-                <div class="graph-area">
+            <div class="sim-layout">
+                <div class="graph-box">
                     <canvas id="graphCanvas"></canvas>
                     <div class="graph-legend">
                         <div class="legend-item"><span class="dot normal"></span> مادة عادية</div>
@@ -352,29 +181,44 @@ void topologicalSort() {
                         <div class="legend-item"><span class="dot done"></span> تمت معالجتها</div>
                     </div>
                 </div>
+
+                <div class="controls">
+                    <div class="control-block">
+                        <h4>إضافة مادة</h4>
+                        <input type="text" id="courseName" placeholder="اسم المادة">
+                        <button class="btn btn-primary" onclick="addCourse()">إضافة</button>
+                    </div>
+
+                    <div class="control-block">
+                        <h4>ربط متطلب</h4>
+                        <select id="fromCourse"></select>
+                        <select id="toCourse"></select>
+                        <button class="btn btn-primary" onclick="addEdge()">ربط</button>
+                    </div>
+
+                    <div class="control-block">
+                        <h4>الخوارزميات</h4>
+                        <button class="btn btn-success" onclick="runTopologicalSort()">Topological Sort</button>
+                        <button class="btn btn-warning" onclick="detectCycle()">كشف الحلقة</button>
+                        <button class="btn btn-danger" onclick="resetGraph()">إعادة ضبط</button>
+                    </div>
+
+                    <div class="sim-output" id="simOutput">ابدأ بإضافة مواد...</div>
+                </div>
             </div>
         </div>
     </section>
 
-    <section id="editor" class="editor-section">
+    <section id="code" class="section">
         <div class="container">
-            <div class="section-header">
-                <h2>محرر الكود C++</h2>
-                <p>كود المشروع الحقيقي مع بيانات جاهزة ونتائج فورية</p>
-            </div>
+            <h2 class="section-title">محرر الكود C++</h2>
+            <p class="section-subtitle">كود المشروع مع بيانات جاهزة</p>
 
-            <div class="editor-container">
-                <div class="editor-toolbar">
-                    <div class="toolbar-title">
-                        <span class="file-icon">📄</span>
-                        <span>main.cpp</span>
-                    </div>
-                    <button class="btn btn-primary run-btn" onclick="runCppCode()">
-                        <span class="play-icon">▶</span>
-                        تشغيل الكود
-                    </button>
-                </div>
-                <textarea id="cppEditor" class="code-editor" spellcheck="false">#include &lt;iostream&gt;
+            <div class="editor-toolbar">
+                <div class="editor-title">📄 main.cpp</div>
+                <button class="btn btn-primary" onclick="runCppCode()" style="padding: 0.5rem 1rem; font-size: 0.85rem;">▶ تشغيل</button>
+            </div>
+            <textarea class="editor" id="cppEditor" spellcheck="false">#include &lt;iostream&gt;
 #include &lt;string&gt;
 using namespace std;
 
@@ -407,21 +251,18 @@ int courseIndex(int id) {
 
 void topoDFS(int u, bool visited[]) {
     visited[u] = true;
-
     for (int i = 0; i &lt; adjCount[u]; i++) {
         int v = adj[u][i];
         int vIdx = courseIndex(v);
         if (vIdx != -1 &amp;&amp; !visited[vIdx])
             topoDFS(vIdx, visited);
     }
-
     topoStack[++topoTop] = courses[u].id;
 }
 
 void showPrerequisites(int id) {
     int idx = courseIndex(id);
     if (idx == -1) return;
-
     for (int i = 0; i &lt; prereqCount[idx]; i++) {
         int preId = prereq[idx][i];
         int pIdx = courseIndex(preId);
@@ -433,29 +274,21 @@ void showPrerequisites(int id) {
 }
 
 int main() {
-    // ====== بيانات جاهزة ======
     courses[courseCount++] = {101, "Programming 1", 3};
     courses[courseCount++] = {102, "Programming 2", 3};
     courses[courseCount++] = {103, "Data Structures", 3};
     courses[courseCount++] = {104, "Algorithms", 3};
 
-    // Programming 1 --&gt; Programming 2
     adj[0][adjCount[0]++] = 102;
     prereq[1][prereqCount[1]++] = 101;
-
-    // Programming 2 --&gt; Data Structures
     adj[1][adjCount[1]++] = 103;
     prereq[2][prereqCount[2]++] = 102;
-
-    // Data Structures --&gt; Algorithms
     adj[2][adjCount[2]++] = 104;
     prereq[3][prereqCount[3]++] = 103;
 
     cout &lt;&lt; "=== All Courses ===\n";
-    for (int i = 0; i &lt; courseCount; i++) {
-        cout &lt;&lt; courses[i].id &lt;&lt; " - " &lt;&lt; courses[i].name
-             &lt;&lt; " (" &lt;&lt; courses[i].hours &lt;&lt; " hours)\n";
-    }
+    for (int i = 0; i &lt; courseCount; i++)
+        cout &lt;&lt; courses[i].id &lt;&lt; " - " &lt;&lt; courses[i].name &lt;&lt; "\n";
 
     cout &lt;&lt; "\n=== Prerequisites for Algorithms ===\n";
     showPrerequisites(104);
@@ -464,9 +297,7 @@ int main() {
     bool visited[MAX] = {false};
     topoTop = -1;
     for (int i = 0; i &lt; courseCount; i++)
-        if (!visited[i])
-            topoDFS(i, visited);
-
+        if (!visited[i]) topoDFS(i, visited);
     for (int i = topoTop; i &gt;= 0; i--) {
         int idx = courseIndex(topoStack[i]);
         cout &lt;&lt; courses[idx].id &lt;&lt; " - " &lt;&lt; courses[idx].name &lt;&lt; "\n";
@@ -474,22 +305,21 @@ int main() {
 
     return 0;
 }</textarea>
-                <div class="console-output">
-                    <div class="console-header">
-                        <span>Terminal Output</span>
-                        <button class="clear-btn" onclick="clearOutput()">مسح</button>
-                    </div>
-                    <div id="consoleOutput" class="console-body">
-                        اضغط "تشغيل الكود" لرؤية الناتج هنا...
-                    </div>
+
+            <div class="console">
+                <div class="console-header">
+                    <span>Terminal Output</span>
+                    <button class="clear-btn" onclick="clearOutput()">مسح</button>
                 </div>
+                <div class="console-body" id="consoleOutput">اضغط "تشغيل" لرؤية الناتج...</div>
             </div>
         </div>
     </section>
 
     <footer class="footer">
-        <p>تم إنشاء هذا الموقع كمشروع مادة الخوارزميات 2 🎓</p>
-        <p>Graph Algorithms: Topological Sort & Cycle Detection</p>
+        <div class="container">
+            <p>مشروع مادة الخوارزميات 2 - Graph Algorithms</p>
+        </div>
     </footer>
 
     <script src="script.js"></script>
