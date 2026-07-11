@@ -224,7 +224,8 @@ using namespace std;
 
 const int MAX = 100;
 
-struct Course {
+struct Course
+{
     int id;
     string name;
     int hours;
@@ -234,75 +235,402 @@ Course courses[MAX];
 int courseCount = 0;
 
 int prereq[MAX][MAX];
-int prereqCount[MAX] = {0};
+int prereqCount[MAX];
 
 int adj[MAX][MAX];
-int adjCount[MAX] = {0};
+int adjCount[MAX];
 
 int topoStack[MAX];
 int topoTop = -1;
 
-int courseIndex(int id) {
-    for (int i = 0; i &lt; courseCount; i++)
-        if (courses[i].id == id)
+int courseIndex(int id)
+{
+    for(int i = 0; i &lt; courseCount; i++)
+    {
+        if(courses[i].id == id)
             return i;
+    }
+
     return -1;
 }
 
-void topoDFS(int u, bool visited[]) {
-    visited[u] = true;
-    for (int i = 0; i &lt; adjCount[u]; i++) {
-        int v = adj[u][i];
-        int vIdx = courseIndex(v);
-        if (vIdx != -1 &amp;&amp; !visited[vIdx])
-            topoDFS(vIdx, visited);
+void addCourse()
+{
+    Course c;
+
+    cout &lt;&lt; "Enter course ID: ";
+    cin &gt;&gt; c.id;
+
+    if(courseIndex(c.id) != -1)
+    {
+        cout &lt;&lt; "Course already exists!\n";
+        return;
     }
-    topoStack[++topoTop] = courses[u].id;
+
+    cout &lt;&lt; "Enter course name: ";
+    cin.ignore();
+    getline(cin, c.name);
+
+    cout &lt;&lt; "Enter credit hours: ";
+    cin &gt;&gt; c.hours;
+
+    courses[courseCount] = c;
+    courseCount++;
+
+    cout &lt;&lt; "Course added successfully.\n";
 }
 
-void showPrerequisites(int id) {
+void deleteCourse()
+{
+    int id;
+
+    cout &lt;&lt; "Enter course ID to delete: ";
+    cin &gt;&gt; id;
+
     int idx = courseIndex(id);
-    if (idx == -1) return;
-    for (int i = 0; i &lt; prereqCount[idx]; i++) {
+
+    if(idx == -1)
+    {
+        cout &lt;&lt; "Course not found!\n";
+        return;
+    }
+
+    int lastIndex = courseCount - 1;
+
+    courses[idx] = courses[lastIndex];
+
+    prereqCount[idx] = prereqCount[lastIndex];
+    adjCount[idx] = adjCount[lastIndex];
+
+    for(int j = 0; j &lt; prereqCount[idx]; j++)
+        prereq[idx][j] = prereq[lastIndex][j];
+
+    for(int j = 0; j &lt; adjCount[idx]; j++)
+        adj[idx][j] = adj[lastIndex][j];
+
+    courseCount--;
+
+    for(int i = 0; i &lt; courseCount; i++)
+    {
+        for(int j = 0; j &lt; prereqCount[i]; j++)
+        {
+            if(prereq[i][j] == id)
+            {
+                for(int k = j; k &lt; prereqCount[i] - 1; k++)
+                    prereq[i][k] = prereq[i][k + 1];
+
+                prereqCount[i]--;
+                j--;
+            }
+        }
+    }
+
+    for(int i = 0; i &lt; courseCount; i++)
+    {
+        for(int j = 0; j &lt; adjCount[i]; j++)
+        {
+            if(adj[i][j] == id)
+            {
+                for(int k = j; k &lt; adjCount[i] - 1; k++)
+                    adj[i][k] = adj[i][k + 1];
+
+                adjCount[i]--;
+                j--;
+            }
+        }
+    }
+
+    cout &lt;&lt; "Course deleted successfully.\n";
+}
+
+void displayCourses()
+{
+    if(courseCount == 0)
+    {
+        cout &lt;&lt; "No courses available.\n";
+        return;
+    }
+
+    cout &lt;&lt; "\n--- All Courses ---\n";
+
+    for(int i = 0; i &lt; courseCount; i++)
+    {
+        cout &lt;&lt; courses[i].id &lt;&lt; " - " &lt;&lt; courses[i].name
+             &lt;&lt; " (" &lt;&lt; courses[i].hours &lt;&lt; " hours)\n";
+    }
+}
+
+void addPrerequisite()
+{
+    int courseId;
+    int preId;
+
+    cout &lt;&lt; "Enter course ID (needs prerequisite): ";
+    cin &gt;&gt; courseId;
+
+    cout &lt;&lt; "Enter prerequisite course ID: ";
+    cin &gt;&gt; preId;
+
+    int cIdx = courseIndex(courseId);
+    int pIdx = courseIndex(preId);
+
+    if(cIdx == -1 || pIdx == -1)
+    {
+        cout &lt;&lt; "One or both courses not found!\n";
+        return;
+    }
+
+    if(courseId == preId)
+    {
+        cout &lt;&lt; "A course cannot be a prerequisite for itself!\n";
+        return;
+    }
+
+    for(int i = 0; i &lt; prereqCount[cIdx]; i++)
+    {
+        if(prereq[cIdx][i] == preId)
+        {
+            cout &lt;&lt; "Prerequisite already exists!\n";
+            return;
+        }
+    }
+
+    prereq[cIdx][prereqCount[cIdx]] = preId;
+    prereqCount[cIdx]++;
+
+    adj[pIdx][adjCount[pIdx]] = courseId;
+    adjCount[pIdx]++;
+
+    cout &lt;&lt; "Prerequisite added successfully.\n";
+}
+
+void deletePrerequisite()
+{
+    int courseId;
+    int preId;
+
+    cout &lt;&lt; "Enter course ID: ";
+    cin &gt;&gt; courseId;
+
+    cout &lt;&lt; "Enter prerequisite course ID to remove: ";
+    cin &gt;&gt; preId;
+
+    int cIdx = courseIndex(courseId);
+    int pIdx = courseIndex(preId);
+
+    if(cIdx == -1 || pIdx == -1)
+    {
+        cout &lt;&lt; "One or both courses not found!\n";
+        return;
+    }
+
+    bool found = false;
+
+    for(int i = 0; i &lt; prereqCount[cIdx]; i++)
+    {
+        if(prereq[cIdx][i] == preId)
+        {
+            for(int j = i; j &lt; prereqCount[cIdx] - 1; j++)
+                prereq[cIdx][j] = prereq[cIdx][j + 1];
+
+            prereqCount[cIdx]--;
+            found = true;
+            break;
+        }
+    }
+
+    for(int i = 0; i &lt; adjCount[pIdx]; i++)
+    {
+        if(adj[pIdx][i] == courseId)
+        {
+            for(int j = i; j &lt; adjCount[pIdx] - 1; j++)
+                adj[pIdx][j] = adj[pIdx][j + 1];
+
+            adjCount[pIdx]--;
+            break;
+        }
+    }
+
+    if(found)
+        cout &lt;&lt; "Prerequisite removed successfully.\n";
+    else
+        cout &lt;&lt; "Prerequisite not found!\n";
+}
+
+void showPrerequisites(int id)
+{
+    int idx = courseIndex(id);
+
+    if(idx == -1)
+        return;
+
+    for(int i = 0; i &lt; prereqCount[idx]; i++)
+    {
         int preId = prereq[idx][i];
-        int pIdx = courseIndex(preId);
-        cout &lt;&lt; "- " &lt;&lt; preId &lt;&lt; " - ";
-        if (pIdx != -1) cout &lt;&lt; courses[pIdx].name;
-        cout &lt;&lt; "\n";
+
+        cout &lt;&lt; "- " &lt;&lt; preId &lt;&lt; "\n";
+
         showPrerequisites(preId);
     }
 }
 
-int main() {
-    courses[courseCount++] = {101, "Programming 1", 3};
-    courses[courseCount++] = {102, "Programming 2", 3};
-    courses[courseCount++] = {103, "Data Structures", 3};
-    courses[courseCount++] = {104, "Algorithms", 3};
+void displayPrerequisitesMenu()
+{
+    int id;
 
-    adj[0][adjCount[0]++] = 102;
-    prereq[1][prereqCount[1]++] = 101;
-    adj[1][adjCount[1]++] = 103;
-    prereq[2][prereqCount[2]++] = 102;
-    adj[2][adjCount[2]++] = 104;
-    prereq[3][prereqCount[3]++] = 103;
+    cout &lt;&lt; "Enter course ID: ";
+    cin &gt;&gt; id;
 
-    cout &lt;&lt; "=== All Courses ===\n";
-    for (int i = 0; i &lt; courseCount; i++)
-        cout &lt;&lt; courses[i].id &lt;&lt; " - " &lt;&lt; courses[i].name &lt;&lt; "\n";
+    int idx = courseIndex(id);
 
-    cout &lt;&lt; "\n=== Prerequisites for Algorithms ===\n";
-    showPrerequisites(104);
-
-    cout &lt;&lt; "\n=== Recommended Study Order ===\n";
-    bool visited[MAX] = {false};
-    topoTop = -1;
-    for (int i = 0; i &lt; courseCount; i++)
-        if (!visited[i]) topoDFS(i, visited);
-    for (int i = topoTop; i &gt;= 0; i--) {
-        int idx = courseIndex(topoStack[i]);
-        cout &lt;&lt; courses[idx].id &lt;&lt; " - " &lt;&lt; courses[idx].name &lt;&lt; "\n";
+    if(idx == -1)
+    {
+        cout &lt;&lt; "Course not found!\n";
+        return;
     }
 
+    cout &lt;&lt; "\nPrerequisites for " &lt;&lt; courses[idx].name &lt;&lt; ":\n";
+
+    if(prereqCount[idx] == 0)
+    {
+        cout &lt;&lt; "No prerequisites.\n";
+        return;
+    }
+
+    showPrerequisites(id);
+}
+
+bool hasCycleDFS(int u, int state[])
+{
+    state[u] = 1;
+
+    for(int i = 0; i &lt; adjCount[u]; i++)
+    {
+        int v = adj[u][i];
+        int vIdx = courseIndex(v);
+
+        if(vIdx == -1)
+            continue;
+
+        if(state[vIdx] == 1)
+            return true;
+
+        if(state[vIdx] == 0 && hasCycleDFS(vIdx, state))
+            return true;
+    }
+
+    state[u] = 2;
+
+    return false;
+}
+
+bool detectCycle()
+{
+    int state[MAX] = {0};
+
+    for(int i = 0; i &lt; courseCount; i++)
+    {
+        if(state[i] == 0)
+        {
+            if(hasCycleDFS(i, state))
+                return true;
+        }
+    }
+    return false;
+}
+
+void topoDFS(int u, bool visited[])
+{
+    visited[u] = true;
+
+    for(int i = 0; i &lt; adjCount[u]; i++)
+    {
+        int v = adj[u][i];
+        int vIdx = courseIndex(v);
+
+        if(vIdx != -1 && !visited[vIdx])
+            topoDFS(vIdx, visited);
+    }
+
+    topoStack[++topoTop] = courses[u].id;
+}
+
+void topologicalSort()
+{
+    if(courseCount == 0)
+    {
+        cout &lt;&lt; "No courses to sort.\n";
+        return;
+    }
+
+    if(detectCycle())
+    {
+        cout &lt;&lt; "Cannot sort: cycle detected in prerequisites!\n";
+        return;
+    }
+
+    bool visited[MAX] = {false};
+    topoTop = -1;
+
+    for(int i = 0; i &lt; courseCount; i++)
+    {
+        if(!visited[i])
+            topoDFS(i, visited);
+    }
+
+    cout &lt;&lt; "\n--- Recommended Study Order ---\n";
+
+    for(int i = topoTop; i &gt;= 0; i--)
+    {
+        int idx = courseIndex(topoStack[i]);
+        cout &lt;&lt; topoTop - i + 1 &lt;&lt; ". "
+             &lt;&lt; courses[idx].id &lt;&lt; " - " &lt;&lt; courses[idx].name &lt;&lt; "\n";
+    }
+}
+
+void menu()
+{
+    int choice;
+
+    do
+    {
+        cout &lt;&lt; "\n===== Academic Course Prerequisite System =====\n";
+        cout &lt;&lt; "1. Add Course\n";
+        cout &lt;&lt; "2. Delete Course\n";
+        cout &lt;&lt; "3. Display All Courses\n";
+        cout &lt;&lt; "4. Add Prerequisite\n";
+        cout &lt;&lt; "5. Delete Prerequisite\n";
+        cout &lt;&lt; "6. Show Prerequisites of a Course\n";
+        cout &lt;&lt; "7. Detect Cycle\n";
+        cout &lt;&lt; "8. Show Recommended Study Order (Topological Sort)\n";
+        cout &lt;&lt; "0. Exit\n";
+        cout &lt;&lt; "Enter your choice: ";
+        cin &gt;&gt; choice;
+
+        switch(choice)
+        {
+            case 1: addCourse(); break;
+            case 2: deleteCourse(); break;
+            case 3: displayCourses(); break;
+            case 4: addPrerequisite(); break;
+            case 5: deletePrerequisite(); break;
+            case 6: displayPrerequisitesMenu(); break;
+            case 7:
+                if(detectCycle())
+                    cout &lt;&lt; "Cycle detected in the graph!\n";
+                else
+                    cout &lt;&lt; "No cycle found.\n";
+                break;
+            case 8: topologicalSort(); break;
+            case 0: cout &lt;&lt; "Goodbye!\n"; break;
+            default: cout &lt;&lt; "Invalid choice, try again.\n";
+        }
+    } while(choice != 0);
+}
+
+int main()
+{
+    menu();
     return 0;
 }</textarea>
 
